@@ -47,29 +47,35 @@
 
 // app.listen(config.PORT,()=>console.log(`Listening on ${config.PORT}`))
 
-
-import express from 'express';
-import cookieParser from 'cookie-parser';
+import express from "express";
+import cookieParser from "cookie-parser";
 import config from "./config/config.js";
+import passport from "passport";
 import { initMongoDB } from "./config/db-connection.js";
+import { errorHandler } from "./middlewares/error-handler.js";
+import "./middlewares/passport/passport-jwt-cookies.js";
+import "./middlewares/passport/passport-jwt-headers.js";
 
-import usersRouter from './routes/users.router.js';
-import petsRouter from './routes/pets.router.js';
-import adoptionsRouter from './routes/adoption.router.js';
-import sessionsRouter from './routes/sessions.router.js';
+import usersRouter from "./routes/users.router.js";
+import petsRouter from "./routes/pets.router.js";
+import adoptionsRouter from "./routes/adoption.router.js";
+import sessionsRouter from "./routes/sessions.router.js";
 
 const app = express();
 initMongoDB()
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
-
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
-app.use('/api/users',usersRouter);
-app.use('/api/pets',petsRouter);
-app.use('/api/adoptions',adoptionsRouter);
-app.use('/api/sessions',sessionsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/pets", petsRouter);
+app.use("/api/adoptions", adoptionsRouter);
+app.use("/api/sessions", sessionsRouter);
 
-app.listen(config.PORT,()=>console.log(`Listening on ${config.PORT}`))
+app.use(errorHandler);
+
+app.listen(config.PORT, () => console.log(`Listening on ${config.PORT}`));
